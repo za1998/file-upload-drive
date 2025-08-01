@@ -13,21 +13,33 @@ export const authOptions = {
       },
     }),
   ],
-callbacks: {
-  async jwt({ token, account }) {
-    if (account) {
-      token.accessToken = account.access_token; // <-- Simpan token
-    }
-    return token;
+
+  callbacks: {
+    async jwt({ token, account }) {
+      if (account) {
+        token.accessToken = account.access_token;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.accessToken = token.accessToken;
+      return session;
+    },
   },
-  async session({ session, token }) {
-    session.accessToken = token.accessToken; // <-- Kirim ke session
-    return session;
+
+  // ⚠️ Tambahkan bagian ini
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'none',   // <-- penting
+        secure: true,       // <-- wajib di Vercel
+        path: '/',
+      },
+    },
   },
-},
 
   secret: process.env.NEXTAUTH_SECRET,
 };
-
-// ⬇️ INI YANG WAJIB ADA, supaya NextAuth jalan
 export default NextAuth(authOptions);
